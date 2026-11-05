@@ -1,0 +1,16 @@
+[Unit]
+Description=New API development gateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/new-api-gateway run --config %h/.config/new-api-gateway/gateway.json --state %h/.local/state/new-api-gateway
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=40
+UMask=0077
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

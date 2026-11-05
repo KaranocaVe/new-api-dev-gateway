@@ -1,0 +1,43 @@
+name: Release CLI
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+  release:
+    needs: test
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.25.x'
+          cache: false
+      - name: Build Linux CLI archives
+        run: |
+          mkdir -p dist
+          for arch in amd64 arm64; do
+            package="$RUNNER_TEMP/package-$arch"
+            mkdir -p "$package"
+            CGO_ENABLED=0 GOOS=linux GOARCH="$arch" go build -trimpath -ldflags='-s -w' -o "$package/new-api-gateway" ./cmd/new-api-gateway
+            cp LICENSE README.md release.json "$package/"
+            cp -r docs examples "$package/"
+            cp examples/gateway.json "$package/gateway.example.json"
+            tar -C "$package" -czf "dist/new-api-gateway-linux-$arch.tar.gz" .
+          done
+          cd dist
+          sha256sum -- *.tar.gz > SHA256SUMS
+      - name: Publish tested CLI (upstream binaries are downloaded separately)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          printf '%s\n' 'Linux amd64 and arm64 configuration CLI. See README for JSON injection and the container network boundary. Official New API binaries are fetched and verified at install time.' > "$RUNNER_TEMP/release-notes.md"
+          gh release create "$RELEASE_TAG" --verify-tag --title "$RELEASE_TAG" --notes-file "$RUNNER_TEMP/release-notes.md" dist/*

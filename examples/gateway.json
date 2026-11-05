@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "port": 3000,
+  "retries": 2,
+  "client_allow_ips": ["127.0.0.1", "::1"],
+  "runtime": {"GOMEMLIMIT": "256MiB"},
+  "channels": [
+    {
+      "id": "primary",
+      "name": "Primary",
+      "type": "openai",
+      "base_url": "https://api.openai.com",
+      "key": "REPLACE_WITH_YOUR_PROVIDER_KEY",
+      "models": ["gpt-5.4"],
+      "priority": 10,
+      "weight": 1
+    },
+    {
+      "id": "backup",
+      "name": "Backup",
+      "type": "openai",
+      "base_url": "https://provider.example.com",
+      "key": "REPLACE_WITH_YOUR_PROVIDER_KEY",
+      "models": ["gpt-5.4"],
+      "priority": 0,
+      "enabled": false
+    }
+  ]
+}

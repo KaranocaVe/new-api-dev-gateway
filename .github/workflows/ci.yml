@@ -1,0 +1,64 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.25.x'
+          cache: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - name: Format, vet, unit tests and race detector
+        run: |
+          test -z "$(gofmt -l .)"
+          go vet ./...
+          go test -race ./...
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Validate example without displaying secrets
+        run: |
+          cp examples/gateway.json "$RUNNER_TEMP/gateway.json"
+          chmod 600 "$RUNNER_TEMP/gateway.json"
+          go run ./cmd/new-api-gateway validate --config "$RUNNER_TEMP/gateway.json"
+  integration:
+    name: Linux ${{ matrix.arch }} integration
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.25.x'
+          cache: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - name: Build static configuration CLI
+        run: CGO_ENABLED=0 go build -trimpath -o "$RUNNER_TEMP/new-api-gateway" ./cmd/new-api-gateway
+      - name: Run real official release against synthetic providers
+        env:
+          GATEWAY_BIN: ${{ runner.temp }}/new-api-gateway
+        run: python3 tests/integration.py
+      # No credential-bearing state, databases or logs are uploaded.

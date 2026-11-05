@@ -1,0 +1,13 @@
+/gateway.json
+/new-api-gateway
+/.state/
+/dist/
+__pycache__/
+*.pyc
+
+/client.json
+/state.json
+*.db
+*.db-wal
+*.db-shm
+*.log
