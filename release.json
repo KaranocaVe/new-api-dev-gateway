@@ -1,13 +1,13 @@
 {
-  "tag": "v1.0.0-rc.48",
+  "tag": "v1.0.0-rc.51",
   "assets": {
     "amd64": {
-      "url": "https://github.com/QuantumNous/new-api/releases/download/v1.0.0-rc.48/new-api-v1.0.0-rc.48",
-      "sha256": "27fc243aa09eae9b1e3792c1635b3379d859908c59e05f394843686e5cdd50db"
+      "url": "https://github.com/QuantumNous/new-api/releases/download/v1.0.0-rc.51/new-api-v1.0.0-rc.51",
+      "sha256": "a42f4559790021ffec8a609182cf142b430f822cf420270105422c800c519157"
     },
     "arm64": {
-      "url": "https://github.com/QuantumNous/new-api/releases/download/v1.0.0-rc.48/new-api-arm64-v1.0.0-rc.48",
-      "sha256": "c65477070575e8e812aa6a57d5cf9432997ae9859c9a25f5e1d06cb0ba493549"
+      "url": "https://github.com/QuantumNous/new-api/releases/download/v1.0.0-rc.51/new-api-arm64-v1.0.0-rc.51",
+      "sha256": "e02b8643e65910a0115452e5f7a43ee2fd30672ebcd6c7d49428e06746260c81"
     }
   }
 }
